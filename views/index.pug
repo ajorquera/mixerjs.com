@@ -46,35 +46,21 @@ html(lang="en")
                 div(class="form-group col-6")
                     div(class="input textarea custom stackoverflow" id="libraries-with-taggle")
 
-                    div(class="bs-callout bs-callout-danger")
+                    div(class="bs-callout bs-callout-danger invisible" id="error-container")
                         h4 Error
-                        p This is a danger callout.
+                        p(id="error-message")
                 
-                div(class="col-4")
-                    div(class="card")
-                        h3(class="card-header text-capitalize text-center") 
-                            a(target="_blank" href="http://momentjs.com") moment
-                                    
-                        div(class="card-body")
-                            p(class="card-text") Parse, validate, manipulate, and display dates
-                            p
-                                | Stable Release: 
-                                span(class="badge badge-pill badge-primary") 4.5.4
-                            input(class="form-control" value="4.5.4" placeholder="Version")
-                            br
-                            a(class="github-button" href="https://github.com/moment/moment" 
-                              data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub")
-                                
-                            br
-                            br
-                            button(href="#" class="btn btn-info") Select
+                div(class="col-4" id="card-info-container")
+                        
         br
         div(class="container")
             div(class="row")
                 div(class="col-4")
-                    button(type="button" class="btn btn-info btn-lg btn-block utils-clickable") Download
+                    button(id="download-button" type="button" class="btn btn-info btn-lg btn-block utils-clickable") Download
                     
-        footer
+        footer(class="text-center utils-bg-color-mixerjs-blue")
+            div(class="container align-horizontal").
+                © 2017 Virtualitour. Todos los derechos reservados.
             
         div(class="container support")
         
@@ -84,5 +70,4 @@ html(lang="en")
         
         // JS     
         script(src="js/compile.js")
-        script(async defer src="https://buttons.github.io/buttons.js")
             
