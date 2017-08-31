@@ -1,0 +1,32 @@
+{
+  "name": "s3-webpack-template",
+  "version": "1.0.0",
+  "description": "Template for creating websites on s3 using webpack",
+  "main": "index.html",
+  "dependencies": {
+    "awesomplete": "^1.1.2",
+    "particles.js": "^2.0.0",
+    "taggle": "^1.12.0",
+    "whatwg-fetch": "^2.0.3"
+  },
+  "devDependencies": {
+    "html-webpack-plugin": "2.30.1",
+    "css-loader": "0.28.4",
+    "extract-text-webpack-plugin": "2.1.2",
+    "html-loader": "0.5.1",
+    "less": "2.7.2",
+    "less-loader": "4.0.5",
+    "optimize-css-assets-webpack-plugin": "3.0.0",
+    "pug": "2.0.0-rc.3",
+    "pug-html-loader": "1.1.5",
+    "s3Helper": "gist:149957224effc18979ec0394e25dd759",
+    "style-loader": "0.18.2",
+    "webpack": "3.5.3"
+  },
+  "scripts": {
+    "start": "webpack --progress --colors --watch --devtool cheap-module-source-map",
+    "build": "webpack"
+  },
+  "author": "Andres Jorquera",
+  "license": "ISC"
+}

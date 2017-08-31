@@ -1,0 +1,88 @@
+doctype html
+
+html(lang="en")
+    head
+        meta(charset="utf-8")
+        meta(name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no")
+        meta(name="description" content=description)
+
+        //OpenGraph standard
+        meta(property="og:url" content=website)
+        meta(property="og:type" content=website)
+        meta(property="og:title" content=title)
+        meta(property="og:description" content=description)
+        meta(property="og:image" content="https://raw.githubusercontent.com/ajorquera/mixerjs/master/imgs/logo.png")
+
+        title= title
+
+        // Favicon
+        link(href="/favicon.ico" crossorigin="anonymous" rel="icon")
+        
+        link(rel="canonical" href=website)
+
+        //essential css
+        link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
+          integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous")
+
+        
+        link(href="css/compile.css" rel="stylesheet")
+            
+    body
+        div(class="jumbotron jumbotron-fluid")
+            div(id="particles-js")
+            div(class="container")
+                div(class="row")
+                    div(class="col-xs-4")
+                        img(src="https://raw.githubusercontent.com/ajorquera/mixerjs/master/imgs/logo.png" class="img-fluid")
+                            
+                    div(class="col-offset-1 col-8 utils-center-v")
+                        p(class="lead").
+                            With <strong>MixerJS</strong> you will be able to compile and minify javascript libraries 
+                            in a single request. Try it now!
+        
+        div(class="container")
+            | Libraries <i id="loader" class="fa fa-cog fa-fw"></i>
+            div(class="row")
+                div(class="form-group col-6")
+                    div(class="input textarea custom stackoverflow" id="libraries-with-taggle")
+
+                    div(class="bs-callout bs-callout-danger")
+                        h4 Error
+                        p This is a danger callout.
+                
+                div(class="col-4")
+                    div(class="card")
+                        h3(class="card-header text-capitalize text-center") 
+                            a(target="_blank" href="http://momentjs.com") moment
+                                    
+                        div(class="card-body")
+                            p(class="card-text") Parse, validate, manipulate, and display dates
+                            p
+                                | Stable Release: 
+                                span(class="badge badge-pill badge-primary") 4.5.4
+                            input(class="form-control" value="4.5.4" placeholder="Version")
+                            br
+                            a(class="github-button" href="https://github.com/moment/moment" 
+                              data-size="large" data-show-count="true" aria-label="Star ntkme/github-buttons on GitHub")
+                                
+                            br
+                            br
+                            button(href="#" class="btn btn-info") Select
+        br
+        div(class="container")
+            div(class="row")
+                div(class="col-4")
+                    button(type="button" class="btn btn-info btn-lg btn-block utils-clickable") Download
+                    
+        footer
+            
+        div(class="container support")
+        
+        //extra css
+        link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" 
+             integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous")
+        
+        // JS     
+        script(src="js/compile.js")
+        script(async defer src="https://buttons.github.io/buttons.js")
+            
