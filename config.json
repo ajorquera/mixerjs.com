@@ -1,0 +1,17 @@
+{
+    "website": "http://mixerjs.com",
+    "title": "MixerJS - Serve multiple javascript libraries in a single request",
+    "description": "",
+
+    "links": {
+        "logo": "https://raw.githubusercontent.com/ajorquera/mixerjs/master/imgs/logo.png"
+    },
+
+    "CACHE_EXPIRES": 1440,
+
+    "particlesJS": {
+        "maxNumberParticles": 300,
+        "creationSpeed": 100,
+        "particleMultiplier": 0.1
+    }
+}

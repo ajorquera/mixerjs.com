@@ -11,7 +11,7 @@ html(lang="en")
         meta(property="og:type" content=website)
         meta(property="og:title" content=title)
         meta(property="og:description" content=description)
-        meta(property="og:image" content="https://raw.githubusercontent.com/ajorquera/mixerjs/master/imgs/logo.png")
+        meta(property="og:image" content=links.logo)
 
         title= title
 
@@ -21,8 +21,9 @@ html(lang="en")
         link(rel="canonical" href=website)
 
         //essential css
-        link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
-          integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous")
+        if(env === 'production')
+            link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
+                 integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous")
 
         
         link(href="css/compile.css" rel="stylesheet")
@@ -32,8 +33,8 @@ html(lang="en")
             div(id="particles-js")
             div(class="container")
                 div(class="row")
-                    div(class="col-xs-4")
-                        img(src="https://raw.githubusercontent.com/ajorquera/mixerjs/master/imgs/logo.png" class="img-fluid")
+                    div(class="col-4")
+                        img(src=links.logo class="img-fluid")
                             
                     div(class="col-offset-1 col-8 utils-center-v")
                         p(class="lead").
@@ -41,7 +42,7 @@ html(lang="en")
                             in a single request. Try it now!
         
         div(class="container")
-            | Libraries <i id="loader" class="fa fa-cog fa-fw"></i>
+            | Libraries <i id="libraries-loader" class="fa fa-cog fa-fw" spinner></i>
             div(class="row")
                 div(class="form-group col-6")
                     div(class="input textarea custom stackoverflow" id="libraries-with-taggle")
@@ -63,10 +64,12 @@ html(lang="en")
                 © 2017 Virtualitour. Todos los derechos reservados.
             
         div(class="container support")
-        
+            input(type="checkbox" id="minify-checkbox")
+            
         //extra css
-        link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" 
-             integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous")
+        if(env === 'production')
+            link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" 
+                 integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous")
         
         // JS     
         script(src="js/compile.js")

@@ -3,7 +3,7 @@ const webpack           = require('webpack');
 const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HTMLWebpackPLugin = require('html-webpack-plugin');
 
-const messages          = require('./messages');
+const messages          = require('./config');
 const extractLESS       = new ExtractTextPlugin('css/compile.css');
 const extractPagePUG    = new ExtractTextPlugin('index.html');
 const extractSiteMapPUG = new ExtractTextPlugin('sitemap.xml');

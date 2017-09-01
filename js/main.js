@@ -1,102 +1,114 @@
-import style from '../less/style.less'
+var Taggle           = require('taggle');
+var particles        = require('particles.js');
+var Awesomplete      = require("awesomplete");
+var lscache          = require('lscache');
 
-import Taggle from 'taggle'
-import particles from 'particles.js'
-import particlesOptions from './particlesjs-config'
-import Awesomplete from "awesomplete"
+var css              = require('../less/style.less');
 
-let isTagSelected = false;
+var particlesOptions = require('./particlesjs-config')
+var download         = require('./download');
+var simpleRequest    = require('./simpleRequest');
+var cardInfo         = require('./cardInfo');
+var searchPackages   = require('./searchPackages');
+var utils            = require('./utilities');
+var config           = require('../config');
 
-const taggleLibraries = new Taggle(document.querySelector('#libraries-with-taggle'), {
-    duplicateTagClass: 'bounce',
-    placeholder: 'Add the libraries you want to compile. Example: jquery, react=3.4, angular',
-    onBeforeTagAdd: function(event, tag) {
-        return !event;
-    },
-});
+//-------CONSTANTS---------------------------------------------
 
-const tagCache = {};
+//minutes
+var CACHE_EXPIRES = config.CACHE_EXPIRES;
 
-const requestTag = function(tag) {
-    return fetch('https://libraries.io/api/npm/' + tag).then(resp => {
-        if (resp.status >= 200 && resp.status < 300) {
-            return resp.json();
-        } else {
-            handleError(resp);
-        }
-    }, handleError);
-}
+//---------------DOM ELEMENTS----------------------------------------
 
-const getInfo = function(tag) {
-    let tagInfo;
-    let promise;
-    tagInfo = tagCache[tag];
+var librariesLoaderDOM = document.querySelector('#libraries-loader');
+var minifyCheckboxDOM  = document.querySelector('#minify-checkbox');
+var errorContainerDOM  = document.querySelector('#error-container');
+var downloadButtonDOM  = document.querySelector('#download-button');
+var particlesJSDOM     = document.querySelector('#particles-js');
+var cardInfoDOM        = document.querySelector('#card-info-container');
+var taggleDOM          = document.querySelector('#libraries-with-taggle');
+var particleCanvas     = null;
+var taggleInputDOM     = null;
 
-    if(tagInfo) {
-        promise = Promise.resolve(tagInfo);
-    } else {
-        promise = requestTag(tag);
-    }
+//----------LISTENERS--------------------------------------------------------
 
-    promise.then(tagInfo => {
-        const cardInfo = document.querySelector('#card-info-container');
-        cardInfo.innerHTML = createTagCard(tagInfo);
-    });
-}
+var onBeforeAddTagTaggle = function(event, tag) {
 
-const createTagCard = function(tag) {
-return `
-<div class="card">
-    <h3 class="card-header text-capitalize text-center"> <a target="_blank" href="${tag.homepage}">${tag.name}</a></h3>
-    <div class="card-body">
-        <p class="card-text">${tag.description}</p>
-        <p>Stable Release: <span class="badge badge-pill badge-primary">${tag.latest_release_number}</span></p>
-        <input class="form-control" value="${tag.latest_release_number}" placeholder="Version"><br>
+    //don't add tags that come from an event
+    var shouldTagBeAdded = !event;
 
-        <br>
-        <iframe src="https://ghbtns.com/github-btn.html?user=twbs&repo=bootstrap&type=star&count=true&size=large" frameborder="0" scrolling="0" width="160px" height="30px"></iframe>
-        <br>
-        <button class="btn btn-info" href="#">Select</button>
-    </div>
-</div>
-`
-}
+    return shouldTagBeAdded;
+};
 
-const taggleContainer = taggleLibraries.getContainer();
+var onClickTag = function(ev) {
+    var target = ev.target;
 
-taggleContainer.addEventListener('click', function(ev) {
-    let target = ev.target;
-
-    const isDiv = target.classList.contains('taggle');
+    var isDiv = target.classList.contains('taggle');
 
     if(isDiv) {
         target = target.querySelector('taggle_text');
     }
 
-    const isSpan = target && target.classList.contains('taggle_text');
+    var isTagFound = target && target.classList.contains('taggle_text');
 
-    let tag;
-    if(isSpan) {
-        tag = target.innerHTML;
-        getInfo(tag);
+    if(isTagFound) {
+        var tag = target.innerHTML;
+        cardInfo.getPackageInfo(tag).then(function(tagInfo) {
+            cardInfoDOM.innerHTML = cardInfo.createTagCardHTML(tagInfo);
+        }, handleError);;
     }
-
-});
-
-const setLoader = function(spin) {
-    const loader = document.querySelector('#loader');
-
-    if(spin) {
-        loader.classList.add('fa-spin');
-    } else {
-        loader.classList.remove('fa-spin');
-
-    }
-
 }
 
-const handleError = function(resp) {
-    let message;
+var onkey = (function() {
+
+    //create a closure for searchTimeout
+    var searchTimeout = null;
+
+    return function(ev) {
+        var value = taggleInputDOM.value;
+        if(!value) return;
+
+        lscache.setBucket('search-packages');
+        var isSearchMade = lscache.get(value);
+
+        if(!isSearchMade) {
+            window.clearTimeout(searchTimeout);
+            searchTimeout = window.setTimeout(function() {
+                utils.setLoader(librariesLoaderDOM, true);
+
+                searchPackages(value).then(function(list) {
+                    utils.setLoader(librariesLoaderDOM, false);
+                    setList(list);
+
+                    //set that this search has been made
+                    lscache.setBucket('search-packages');
+                    lscache.set(value, true, CACHE_EXPIRES);
+
+                }, handleError);
+            },1000);
+        }
+    };
+})();
+
+var onAwesompleteSelect = function(ev) {
+    ev.preventDefault();
+    autoComplete.close();
+    taggleLibraries.add(ev.text.value);
+}
+
+var onClickDownload = function(event) {
+    var tags = taggleLibraries.getTags().values;
+    var isMinify = minifyCheckboxDOM.checked
+    simpleRequest(`http://api.mixerjs.com/compile.${isMinify ? 'min.' : ''}js?${tags.join('&')}`).then(response => {
+        download(response);
+    }, handleError);
+}
+
+//-------------------------OTHERS------------------------------------------------------------------
+
+var handleError = function(e) {
+    var message;
+    var resp = e.xhr
 
     if(resp.status === 404) {
         message = 'Something strange happend. Check the library information';
@@ -105,138 +117,95 @@ const handleError = function(resp) {
     message = message || resp.message;
 
     document.querySelector('#error-message').innerHTML = message;
-    document.querySelector('#error-container').classList.remove('invisible');
-    setLoader(false);
+    errorContainerDOM.classList.remove('invisible');
+
+    utils.setLoader(librariesLoaderDOM, false);
 }
 
-const loadingPromises = [];
-const searchPackages = function(query) {
-    loadingPromises[query] = true;
+var getList = function() {
+    lscache.setBucket('package-list');
+    return lscache.get('list') || [];
+}
 
-    setLoader(true);
+var setList = function(list) {
+    var newList = getList()
+    var newCount = 0;
+    list.forEach(function(newItem) {
+        for (var i = 0; i < newList.length; i++) {
+            var oldItem = newList[i]
 
-    const promise = (function(query){
-        return fetch('https://libraries.io/api/bower-search?q=' + query).then(resp => {
-            if (resp.status >= 200 && resp.status < 300) {
-                delete loadingPromises[query];
-                if(Object.keys(loadingPromises).length === 0) {
-                    setLoader(false);
-                }
-
-                return resp.json();
-            } else {
-                handleError(resp)
+            if(oldItem.value === newItem.value) {
+                return;
             }
+        }
 
-        }, handleError);
-    })(query);
-
-
-
-    cache[query] = true;
-
-    promise.then(function(resp) {
-        resp.forEach(function(newItem) {
-            let exist = false;
-
-            for (var i = 0; i < list.length; i++) {
-                const item = list[i];
-                if(newItem.name === item.name) {
-                    exist = true;
-                }
-            }
-
-            if(!exist) {
-                list.push({label: newItem.name, value: newItem.name});
-            }
-        });
-
-        autoComplete.evaluate();
+        newList.push(newItem);
+        newCount += 1;
     });
-};
+
+    createParticles(newCount);
+    autoComplete.list = newList;
+    lscache.set('list', newList, CACHE_EXPIRES);
+    autoComplete.evaluate();
+}
+
+var createParticles = (function() {
+    var numberParticles = 0;
+    var maxParticleNumber = config.particlesJS.maxNumberParticles;
+
+    return function(total) {
+        total = total === undefined ? getList().length : total;
+
+        total = parseInt(total*config.particlesJS.particleMultiplier);
+
+        if(!total || numberParticles > maxParticleNumber) return;
+
+        var count = 0;
+
+        var interval = setInterval(function() {
+            if(count > total || numberParticles > maxParticleNumber) return clearInterval(interval);
+
+            particleCanvas.click();
+            count += 1;
+            numberParticles += 1;
+        }, config.particlesJS.creationSpeed);
+    };
+})();
 
 
-let searchTimeout = null;
+//-------------------Taggle PLUGIN-----------------------------------------------------
 
-const cache = {};
-
-const libraryInput = taggleLibraries.getInput();
-taggleLibraries.getInput().addEventListener('keyup', function(ev) {
-
-    const value = libraryInput.value;
-
-    let query = cache[value];
-
-    if(query) {
-
-    } else {
-        window.clearTimeout(searchTimeout);
-        searchTimeout = window.setTimeout(function() {
-            searchPackages(value);
-        },1000);
-    }
+var taggleLibraries = new Taggle(taggleDOM, {
+    duplicateTagClass  : 'bounce',
+    placeholder        : 'jquery, react, angular',
+    onBeforeTagAdd     : onBeforeAddTagTaggle,
+    submitKeys         : [188, 9, 13, 32]
 });
 
+taggleInputDOM = taggleLibraries.getInput();
 
-particlesJS('particles-js', particlesOptions, function() {
-  console.log('callback - particles.js config loaded');
-});
+taggleDOM.addEventListener('click', onClickTag);
 
-const list = [];
-const autoComplete = new Awesomplete(taggleLibraries.getInput(), {
+//-------------------particles.js PLUGIN----------------------------------------------------------------
+
+particlesJS('particles-js', particlesOptions);
+particleCanvas = particlesJSDOM.querySelector('canvas');
+
+createParticles();
+
+//-------------------Awesomplete PLUGIN---------------------------------------------------------------
+
+lscache.setBucket('package-list');
+
+var autoComplete = new Awesomplete(taggleLibraries.getInput(), {
     maxItems: 20,
     minChars: 1,
     autoFirst: true,
-	list
+    list: getList()
 })
 
-taggleLibraries.getInput().addEventListener('awesomplete-select', function(ev) {
-    isTagSelected = true;
-    ev.preventDefault();
-    autoComplete.close();
-    taggleLibraries.add(ev.text.value);
-});
+taggleInputDOM.addEventListener('awesomplete-select', onAwesompleteSelect);
+taggleInputDOM.addEventListener('keyup', onkey);
 
-const download = function(event) {
-    let query = '';
-
-    const tags = taggleLibraries.getTags().values;
-
-    tags.forEach(tag => {
-        query += `${tag}&`
-    });
-
-    let xhr = new XMLHttpRequest();
-    //set the request type to post and the destination url to '/convert'
-    xhr.open('GET', 'http://api.mixerjs.com/compile.js?' + query);
-    //set the reponse type to blob since that's what we're expecting back
-    xhr.responseType = 'blob';
-
-    xhr.onload = function(e) {
-        if (this.status == 200) {
-            // Create a new Blob object using the
-            //response data of the onload object
-            var blob = new Blob([this.response], {type: 'application/javascript'});
-            //Create a link element, hide it, direct
-            //it towards the blob, and then 'click' it programatically
-            let a = document.createElement("a");
-            a.style = "display: none";
-            document.body.appendChild(a);
-            //Create a DOMString representing the blob
-            //and point the link element towards it
-            let url = window.URL.createObjectURL(blob);
-            a.href = url;
-            a.download = 'compile.js';
-            //programatically click the link to trigger the download
-            a.click();
-            //release the reference to the file by revoking the Object URL
-            window.URL.revokeObjectURL(url);
-        }else{
-            handleError(e);
-        }
-    };
-
-    xhr.send();
-}
-
-document.querySelector('#download-button').addEventListener('click', download);
+//----------------------Download Button-------------------------------------------------------------------
+downloadButtonDOM.addEventListener('click', onClickDownload);
