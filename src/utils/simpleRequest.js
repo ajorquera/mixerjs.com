@@ -3,9 +3,13 @@ var simpleRequest = function(url) {
         var xhr = new XMLHttpRequest();
         xhr.open('GET', url);
 
+        var requestObject = {xhr, url};
+
+        xhr.onerror = function(e) {
+            reject(requestObject);
+        };
 
         xhr.onload = function(e) {
-            var requestObject = {xhr, url};
             var response;
 
             if (xhr.status < 400) {

@@ -1,35 +1,30 @@
 {
-  "name": "s3-webpack-template",
-  "version": "1.0.0",
-  "description": "Template for creating websites on s3 using webpack",
-  "main": "index.html",
-  "dependencies": {
-    "awesomplete": "^1.1.2",
-    "lscache": "^1.1.0",
-    "particles.js": "^2.0.0",
-    "taggle": "^1.12.0",
-    "whatwg-fetch": "^2.0.3"
-  },
-  "devDependencies": {
-    "bootstrap": "^4.0.0-beta",
-    "css-loader": "0.28.4",
-    "extract-text-webpack-plugin": "2.1.2",
-    "font-awesome": "^4.7.0",
-    "html-loader": "0.5.1",
-    "html-webpack-plugin": "2.30.1",
-    "less": "2.7.2",
-    "less-loader": "4.0.5",
-    "optimize-css-assets-webpack-plugin": "3.0.0",
-    "pug": "2.0.0-rc.3",
-    "pug-html-loader": "1.1.5",
-    "s3Helper": "gist:149957224effc18979ec0394e25dd759",
-    "style-loader": "0.18.2",
-    "webpack": "3.5.3"
-  },
-  "scripts": {
-    "start": "webpack --progress --colors --watch --devtool cheap-module-source-map",
-    "build": "webpack"
-  },
-  "author": "Andres Jorquera",
-  "license": "ISC"
+    "name": "mixerjs.com",
+    "description": "Website for mixerJS",
+    "version": "1.0.0",
+    "author": "Andres Jorquera <jorquera.ad@jortech.com.ve>",
+    "scripts": {
+        "dev": "cross-env NODE_ENV=development webpack-dev-server --open --hot",
+        "build": "cross-env NODE_ENV=production webpack --progress --hide-modules"
+    },
+    "dependencies": {
+        "bootstrap": "4.0.0-beta",
+        "particles.js": "2.0.0",
+        "vue": "2.3.3"
+    },
+    "devDependencies": {
+        "babel-core": "6.0.0",
+        "babel-loader": "6.0.0",
+        "babel-preset-env": "1.5.1",
+        "cross-env": "3.0.0",
+        "css-loader": "0.25.0",
+        "file-loader": "0.9.0",
+        "less": "2.7.2",
+        "less-loader": "4.0.5",
+        "pug": "2.0.0-rc.3",
+        "vue-loader": "12.1.0",
+        "vue-template-compiler": "2.3.3",
+        "webpack": "2.6.1",
+        "webpack-dev-server": "2.4.5"
+    }
 }

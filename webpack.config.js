@@ -1,53 +1,70 @@
-const path              = require('path');
-const webpack           = require('webpack');
-const ExtractTextPlugin = require('extract-text-webpack-plugin');
-const HTMLWebpackPLugin = require('html-webpack-plugin');
-
-const messages          = require('./config');
-const extractLESS       = new ExtractTextPlugin('css/compile.css');
-const extractPagePUG    = new ExtractTextPlugin('index.html');
-const extractSiteMapPUG = new ExtractTextPlugin('sitemap.xml');
-
-let plugins = [
-    extractLESS
-];
-
-const files = [
-    {input: '/index', output: 'index.html'},
-];
-
-plugins = plugins.concat(files.map(file => {
-    return new HTMLWebpackPLugin({
-        filename: `${file.output}`,
-        template: `./views/${file.input}.pug`,
-        inject:false
-    })
-}));
-
-const pugOptions = {
-    pretty: true,
-    data: messages
-}
+var path = require('path')
+var webpack = require('webpack')
 
 module.exports = {
-    entry: {
-        main:  ['whatwg-fetch','./js/main.js']
-    },
+    entry: './src/main.js',
     output: {
-        path: path.resolve(__dirname, "./output"),
-        filename: 'js/compile.js'
+        path: path.resolve(__dirname, './dist'),
+        publicPath: '/dist/',
+        filename: 'build.js'
     },
     module: {
-        loaders: [
-            { test: /\.less$/i, loader: extractLESS.extract({ use: ['css-loader', {loader: 'less-loader', options: {globalVars: {}}}] })},
-            { test: /\.pug$/, loader: ['html-loader', {loader: 'pug-html-loader', options: pugOptions}]}
+        rules: [
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader',
+                options: {
+                    loaders: {
+                    }
+                    // other vue-loader options go here
+                }
+            },
+            {
+                test: /\.js$/,
+                loader: 'babel-loader',
+                exclude: /node_modules/
+            },
+            {
+                test: /\.(png|jpg|gif|svg)$/,
+                loader: 'file-loader',
+                options: {
+                    name: '[name].[ext]?[hash]'
+                }
+            }
         ]
     },
-    plugins,
     resolve: {
-        extensions: ['.js', '.json'],
         alias: {
-
+            'vue$': 'vue/dist/vue.esm.js'
         }
-    }
-};
+    },
+    devServer: {
+        historyApiFallback: true,
+        noInfo: true
+    },
+    performance: {
+        hints: false
+    },
+    devtool: '#eval-source-map'
+}
+
+if (process.env.NODE_ENV === 'production') {
+    module.exports.devtool = '#source-map'
+    // http://vue-loader.vuejs.org/en/workflow/production.html
+    module.exports.plugins = (module.exports.plugins || []).concat([
+        new webpack.DefinePlugin({
+            'process.env': {
+                NODE_ENV: '"production"'
+            }
+        }),
+        new webpack.optimize.UglifyJsPlugin({
+            sourceMap: true,
+            compress: {
+                warnings: false
+            }
+        }),
+        new webpack.LoaderOptionsPlugin({
+            minimize: true
+        })
+    ])
+}
