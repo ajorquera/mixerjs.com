@@ -8,13 +8,17 @@ import particles from 'particles.js'
 export default {
     name: 'particles',
     data: function() {
-        this.createParticles(this.newParticles);
-        return {};
+        return {
+            particles: 0,
+            pJSDom: null
+        };
     },
     props: {
+
+        effect: [String],
         max: {
             type: Number,
-            default: 300
+            default: 100
         },
         multiplier: {
             type: Number,
@@ -37,28 +41,64 @@ export default {
         }
     },
 
-    methods: {
-        createParticles(total) {
+    watch: {
+        effect: function(name) {
+
             const that = this;
-            total = parseInt(total*this.multiplier);
+            switch (name) {
+                case 'speedUp':
+                    that.speedUp();
+                    break;
+                default:
 
-            if(!total || this.particles >= this.max) return;
+            }
+        },
+        newParticles: function() {
+            const newParticles = window.parseInt(this.newParticles*this.multiplier);
 
+            if(newParticles) {
+                this.createParticles(newParticles);
+            }
+        }
+    },
+
+    methods: {
+        speedUp: function() {
+            const oldSpeed = this.pJSDom.tmp.obj.move_speed;
+            const newSpeed = oldSpeed*5;
+            this.pJSDom.tmp.obj.move_speed = newSpeed;
+            this.pJSDom.fn.retinaInit();
+        },
+        createParticles(total) {
             let count = 0;
+            const that = this;
+            return new Promise((resolve, reject) => {
 
-            let interval = setInterval(function() {
-                if(count >= total || that.particles >= that.max) return clearInterval(interval);
+                if(!total) {
+                    reject('total is not valid: ' + total );
+                } else if(this.particles >= this.max) {
+                    reject('max number particles reached');
+                }
 
-                that._canvas.click();
-                count += 1;
-                that.particles += 1;
-            }, this.creationSpeed);
+
+                let interval = setInterval(function() {
+                    if(count >= total || that.particles >= that.max) {
+                        resolve();
+                        return clearInterval(interval)
+                    };
+
+                    that.pJSDom.fn.modes.pushParticles(1);
+                    count += 1;
+                    that.particles += 1;
+                }, this.creationSpeed);
+            });
+
         }
     },
 
     mounted() {
         particlesJS('particles-js', this.options);
-        this._canvas = this.$refs.particleDOM.querySelector('canvas');
+        this.pJSDom = window.pJSDom[window.pJSDom.length -1].pJS;
     }
 }
 

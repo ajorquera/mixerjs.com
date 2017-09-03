@@ -1,39 +1,33 @@
 
 
 <template lang="pug">
-    div(id="app")
-        div(class="jumbotron jumbotron-fluid")
-            particles(:options="particleJSOptions" :newParticles="100")
-            div(class="container")
-                div(class="row")
-                    div(class="col-4")
-                        img(:src="config.links.logo" class="img-fluid")
-
-                    div(class="col-offset-1 col-8 utils-center-v")
-                        p(class="lead").
-                            With <strong>MixerJS</strong> you will be able to compile and minify javascript libraries
-                            in a single request. Try it now!
-
+div
+    div(class="jumbotron jumbotron-fluid")
+        particles(:options="particleJSOptions" :newParticles="newParticles" :effect="effect")
         div(class="container")
-            | Libraries <i id="libraries-loader" class="fa fa-cog fa-fw" spinner></i> &nbsp;&nbsp;
-
-            div(class="form-check form-check-inline")
-                label(class="form-check-label")
-                    input(class="form-check-input" type="checkbox" id="minify-checkbox")
-                    | &nbsp;Minify?
-
             div(class="row")
-                div(class="form-group col-6")
-                    div(class="custom stackoverflow" id="libraries-with-taggle")
+                div(class="col-4")
+                    img(:src="config.links.logo" class="img-fluid")
 
-                    div(class="bs-callout bs-callout-danger invisible" id="error-container")
-                        h4 Error
-                        p(id="error-message")
+                div(class="col-offset-1 col-8 utils-center-v")
+                    p(class="lead").
+                        With <strong>MixerJS</strong> you will be able to compile and minify javascript libraries
+                        in a single request. Try it now!
+
+    div(class="container")
+        div(class="row")
+            div(class="col-6")
+                div(class="form-check form-check-inline")
+                    label(class="form-check-label")
+                        input(class="form-check-input" type="checkbox" id="minify-checkbox")
+                        | &nbsp;Minify?
+
+                taggle-packages(class="mixerjs-taggle" v-on:update:packages="onPackagesUpdate" v-on:loading="onLoadingUpdate")
 </template>
 
 <script>
-import particles from './components/particles.vue'
-
+import particlesComponent from './components/particles.vue'
+import tagglePackages from './components/tagglePackages.vue'
 import particleJSOptions from './assets/particlesjs-config'
 import config from '../config'
 
@@ -42,11 +36,35 @@ export default {
     data () {
         return {
             particleJSOptions,
-            config
+            loading: false,
+            config,
+            particles: 0,
+            effect: null,
+            bowerPackages: {}
+        }
+    },
+    computed: {
+        newParticles: function() {
+            const newParticles = Object.keys(this.bowerPackages).length - this.particles;
+            this.particles += newParticles;
+
+            return newParticles;
+        }
+
+    },
+
+    methods: {
+        onPackagesUpdate(packages) {
+            this.bowerPackages = packages;
+        },
+
+        onLoadingUpdate(isLoading) {
+            this.loading = isLoading;
         }
     },
     components: {
-        particles
+        particles: particlesComponent,
+        tagglePackages
     }
 }
 </script>
