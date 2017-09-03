@@ -1,5 +1,6 @@
 var path = require('path')
 var webpack = require('webpack')
+var ExtractTextPlugin = require("extract-text-webpack-plugin")
 
 module.exports = {
     entry: './src/main.js',
@@ -14,9 +15,7 @@ module.exports = {
                 test: /\.vue$/,
                 loader: 'vue-loader',
                 options: {
-                    loaders: {
-                    }
-                    // other vue-loader options go here
+                    extractCSS: true
                 }
             },
             {
@@ -45,6 +44,9 @@ module.exports = {
     performance: {
         hints: false
     },
+    plugins: [
+        new ExtractTextPlugin("build.css")
+    ],
     devtool: '#eval-source-map'
 }
 
