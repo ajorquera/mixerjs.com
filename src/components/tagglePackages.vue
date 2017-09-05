@@ -11,8 +11,7 @@
         name: 'tagglePackages',
         data: function() {
             return {
-                taggle: null,
-                packages: {}
+                taggle: null
             }
         },
 
@@ -26,22 +25,62 @@
 
                 //1 day in seconds
                 default: 86400
+            },
+            searchPackages: {
+                type: Object,
+                default: () => {}
+            },
+            replace: {
+                type: String
             }
         },
 
         computed: {
             awesompleteList: function() {
-                return Object.keys(this.packages).map(packageName => {
-                    const name = this.packages[packageName].name;
+                const that = this;
+                return Object.keys(this.searchPackages).map(packageName => {
+                    const packageItem = this.searchPackages[packageName];
 
-                    return {label: name, value: name};
+                    if(packageItem) {
+                        const name = this.searchPackages[packageName].name;
+                        return {label: name, value: name};
+                    }
                 });
             }
         },
+
+        watch: {
+            replace: function(tag) {
+                const tagsArray = this.taggle.getTagValues();
+                let found = false;
+                for(var i=0; i < tagsArray.length; i++) {
+                    const tagToReplace = tagsArray[i];
+
+                    if(this.simplifyTag(tag) === this.simplifyTag(tagToReplace)) {
+                        tagsArray[i] = tag;
+                        found = true;
+                    }
+                }
+                if(found) {
+                    this.taggle.getContainer().querySelector('.selected .taggle_text').innerHTML = tag;
+                    this.$emit('update:selectedPackages', tagsArray);
+                }
+            }
+        },
+
         methods: {
+            simplifyTag(tag) {
+                return tag.replace(/=.+/, '');
+            },
 
-            addListeners() {
+            onTagAdd(ev, tag) {
+                const selectedPackages = this.taggle.getTags().values;
+                this.$emit('update:selectedPackages', selectedPackages);
+            },
 
+            onTagRemove(ev, tag) {
+                const selectedPackages = this.taggle.getTags().values;
+                this.$emit('update:selectedPackages', selectedPackages);
             },
 
             onBeforeAddTagTaggle(ev, tag) {
@@ -56,26 +95,28 @@
                 this.awesomplete.close();
                 this.taggle.add(ev.text.value);
             },
-            getPackageInfo(packageName) {
-                lscache.setBucket('packageInfo');
-                const packageInfo = lscache.get(packageName);
-                let promise;
 
-                if(packageInfo) {
-                    promise = Promise.resolve(packageInfo);
-                } else {
-                    promise = simpleRequest('https://libraries.io/api/npm/' + packageName);
-                    promise.then(packageInfo => {
-                        lscache.setBucket('packageInfo');
-                        lscache.set(packageName, packageInfo, this.expires);
-                    }, this.handleError);
-                }
-
-                return promise;
+            getFromCache() {
+                lscache.setBucket(this.name);
+                return lscache.get('packages');
             },
 
-            handleError(error) {
-                this.$emit('error', error);
+            setCache(item) {
+                lscache.setBucket(this.name);
+                lscache.set('packages', item, this.expires);
+            },
+
+            handleError(response) {
+                const error = {response};
+
+                if(response.status === 404) {
+                    error.code = 'notFound';
+                    error.message = 'Nothing found on search'
+                } else {
+                    error.code = 'unknown';
+                    error.message = 'Something went wrong!'
+                }
+                this.$emit('update:error', error);
             },
 
             selectTag(tagDOM) {
@@ -97,12 +138,9 @@
                 const isTagFound = target && target.classList.contains('taggle_text');
 
                 if(isTagFound) {
-                    const tag = target.innerHTML;
+                    const tag = target.innerHTML.replace(/=.+/, '');
                     this.selectTag(target.parentNode);
-
-                    this.getPackageInfo(tag).then(function(packageInfo) {
-                        that.$emit('packageInfo', packageInfo);
-                    });;
+                    this.$emit('update:selectedPackage', this.searchPackages[tag]);
                 }
             },
 
@@ -116,7 +154,7 @@
                     this.searchTimeoutCB = window.setTimeout(function() {
                         that.search(query).then(function(newPackages) {
                             that.add(newPackages);
-                        });
+                        }, that.handleError);
                     }, that.searchTimeout);
                 }
             },
@@ -127,16 +165,14 @@
                 const that = this;
 
                 newPackages.forEach(function(newPackage) {
-                    that.packages[newPackage.name] = newPackage
+                    that.searchPackages[newPackage.name] = newPackage
                 });
 
-                const updatedPackages = Object.assign({}, this.packages);
+                const updatedPackages = Object.assign({}, this.searchPackages);
 
-                lscache.setBucket('packages-list');
-                lscache.set('packages', this.packages, this.expires);
+                this.setCache(this.searchPackages);
 
-                this.packages = updatedPackages;
-                this.$emit('update:packages', updatedPackages);
+                this.$emit('update:searchPackages', updatedPackages);
 
                 this.updateAwesompleteList();
             },
@@ -147,26 +183,23 @@
             },
 
             exist(packageName) {
-                return !!this.packages[packageName]
-            },
-
-            handleError(error) {
-                this.$emit('error', error);
+                return !!this.searchPackages[packageName]
             },
 
             toggleLoading() {
                 this.loading = !this.loading;
-                this.$emit('loading', this.loading);
+                this.$emit('update:loading', this.loading);
             },
 
             search(query) {
                 const that = this;
+                this.$emit('update:error', null);
+
                 this.toggleLoading();
                 const promise = simpleRequest('https://libraries.io/api/bower-search?q=' + query);
 
                 promise.then(this.toggleLoading.bind(this), (err) => {
                     that.toggleLoading();
-                    that.handleError(err)
                 });
                 return promise;
             },
@@ -179,7 +212,10 @@
                 duplicateTagClass  : 'bounce',
                 placeholder        : 'jquery, react, angular',
                 onBeforeTagAdd     : this.onBeforeAddTagTaggle,
-                submitKeys         : [188, 9, 13, 32]
+                onTagRemove        : this.onTagRemove,
+                onTagAdd           : this.onTagAdd,
+                submitKeys         : [188, 9, 13, 32],
+                preserveCase       : true
             });
 
             this.awesomplete = new Awesomplete(this.taggle.getInput(), {
@@ -188,8 +224,7 @@
                 autoFirst: true
             })
 
-            lscache.setBucket('packages-list');
-            let packages = lscache.get('packages');
+            let packages = this.getFromCache()
 
             if(packages) {
                 packages = Object.keys(packages).map(name => packages[name]);
@@ -245,13 +280,14 @@
 
 
 .mixerjs-taggle {
+    display: inline-block;
+    width: 100%;
     padding: 10px;
     border: 0;
     border: 1px solid @color-mixerjs-orange;
     border-radius: .3em;
     box-shadow: .05em .1em .3em rgba(0,0,0,.3) inset;
     min-height: 100px;
-    overflow: hidden;
 
     &.active {
         outline: none;
@@ -260,11 +296,7 @@
     }
 
     .awesomplete > ul {
-        margin-top: 38px;
-        position: fixed;
-        left: initial;
-        max-width: 30%;
-        min-width: 30px
+        top: 35px;
     }
 }
 
@@ -323,7 +355,6 @@
     padding: 0;
     line-height: 0.5;
     color: @color-mixerjs-blue;
-    color: @color-mixerjs-blue;
     padding-bottom: 4px;
     display: none;
     border: 0;
@@ -343,7 +374,7 @@
 }
 
 .taggle_list .taggle .close:hover {
-    color: #990033;
+    color: @color-mixerjs-blue;
 }
 
 .taggle_placeholder {
