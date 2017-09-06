@@ -1,7 +1,7 @@
 <template lang="pug">
 button(v-on:click="onClick" :disabled="isDisable" :class="[{'utils-clickable': !isDisable}]")
     span(v-if="!loading") Download
-    i(v-if="loading" class="fa fa-refresh fa-spin") 
+    i(v-if="loading" class="fa fa-refresh fa-spin")
 </template>
 
 <script>
@@ -12,9 +12,7 @@ button(v-on:click="onClick" :disabled="isDisable" :class="[{'utils-clickable': !
     export default {
         name: 'download',
         data: function() {
-            return {
-                loading: false
-            }
+            return {};
         },
         props: {
             packages: {
@@ -22,6 +20,10 @@ button(v-on:click="onClick" :disabled="isDisable" :class="[{'utils-clickable': !
                 default: () => []
             },
             minify: {
+                type: Boolean,
+                default: false
+            },
+            loading: {
                 type: Boolean,
                 default: false
             }

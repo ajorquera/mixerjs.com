@@ -4,7 +4,8 @@
     "description": "",
 
     "links": {
-        "logo": "https://raw.githubusercontent.com/ajorquera/mixerjs/master/imgs/logo.png"
+        "logo": "https://raw.githubusercontent.com/ajorquera/mixerjs/master/imgs/logo.png",
+        "giphy": "https://media.giphy.com/media/owG3tJbuGosG4/giphy.gif"
     },
 
     "CACHE_EXPIRES": 1440,

@@ -1,10 +1,10 @@
 <template lang="pug">
-    div(:class="[classPrefix + '-danger', {invisible: !isError}]") 
+    div(:class="[classPrefix + '-danger', !isError ? 'fadeOut': 'fadeInRight', 'animated']" ref="elem")
         h4 Error
         p(v-if="message").
             {{message}}
         p(v-else).
-            Something went wrong. Please create an issue in github
+            Something went wrong. Please create an issue in <a href="https://github.com/ajorquera/mixerjs/issues">github</a>
 
 </template>
 
@@ -40,7 +40,6 @@
 
 .bs-callout {
     padding: 20px;
-    margin: 20px 0;
     border: 1px solid #eee;
     border-left-width: 5px;
     border-radius: 3px;

@@ -11,66 +11,21 @@ html(lang="en")
         meta(property="og:type" content=website)
         meta(property="og:title" content=title)
         meta(property="og:description" content=description)
-        meta(property="og:image" content=links.logo)
+        meta(property="og:image" content=links.giphy)
 
         title= title
 
-        // Favicon
-        link(href="/favicon.ico" crossorigin="anonymous" rel="icon")
+        link(href="/images/favicon.ico" crossorigin="anonymous" rel="icon")
         
         link(rel="canonical" href=website)
 
-        //essential css
-        if(env === 'production')
-            link(rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-beta/css/bootstrap.min.css" 
-                 integrity="sha384-/Y6pD6FV/Vv2HJnA6t+vslU6fwYXjCFtcEpHbNJ0lyAFsXTsjBbfaDjzALeQsN6M" crossorigin="anonymous")
-
-        
-        link(href="css/compile.css" rel="stylesheet")
+        link(href="/css/build.css?v=" + version rel="stylesheet")
             
     body
-        div(class="jumbotron jumbotron-fluid")
-            div(id="particles-js")
-            div(class="container")
-                div(class="row")
-                    div(class="col-4")
-                        img(src=links.logo class="img-fluid")
-                            
-                    div(class="col-offset-1 col-8 utils-center-v")
-                        p(class="lead").
-                            With <strong>MixerJS</strong> you will be able to compile and minify javascript libraries 
-                            in a single request. Try it now!
         
-        div(class="container")
-            | Libraries <i id="libraries-loader" class="fa fa-cog fa-fw" spinner></i>
-            div(class="row")
-                div(class="form-group col-6")
-                    div(class="input textarea custom stackoverflow" id="libraries-with-taggle")
-
-                    div(class="bs-callout bs-callout-danger invisible" id="error-container")
-                        h4 Error
-                        p(id="error-message")
-                
-                div(class="col-4" id="card-info-container")
-                        
-        br
-        div(class="container")
-            div(class="row")
-                div(class="col-4")
-                    button(id="download-button" type="button" class="btn btn-info btn-lg btn-block utils-clickable") Download
-                    
-        footer(class="text-center utils-bg-color-mixerjs-blue")
-            div(class="container align-horizontal").
-                © 2017 Virtualitour. Todos los derechos reservados.
-            
-        div(class="container support")
-            input(type="checkbox" id="minify-checkbox")
-            
-        //extra css
-        if(env === 'production')
-            link(href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet" 
-                 integrity="sha384-wvfXpqpZZVQGK6TAh5PVlGOfQNHSoD2xbE+QkPxCAFlNEevoEH3Sl0sibVcOQVnN" crossorigin="anonymous")
+        div(id="app")
+        iframe(src="https://ghbtns.com/github-btn.html?user=ajorquera&repo=mixerjs&type=star&count=true&size=large" 
+               class="fixed-top m-2 ml-auto" frameborder="0" scrolling="0" width="120px" height="30px")
         
-        // JS     
-        script(src="js/compile.js")
+        script(src="/js/build.js?v=" + version)
             

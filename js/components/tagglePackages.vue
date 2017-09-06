@@ -237,7 +237,7 @@
 </script >
 <style lang="less">
 @import (css) "../../node_modules/awesomplete/awesomplete.css";
-@import '../less/variables';
+@import '../../less/variables';
 
 @keyframes pulsate {
     to {
